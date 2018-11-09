@@ -259,6 +259,13 @@ func server(cmd *cobra.Command, args []string) {
 	// the appropriate OpenAPI operation and try to return an example.
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		info := fmt.Sprintf("%s %v", req.Method, req.URL)
+
+		if req.Method == "OPTIONS" {
+			w.Header().Add("access-control-allow-origin", "*")
+			w.Header().Add("access-control-allow-methods", "*")
+			return
+		}
+
 		route, _, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
 			log.Printf("ERROR: %s => %v", info, err)
@@ -343,6 +350,8 @@ func server(cmd *cobra.Command, args []string) {
 		if mediatype != "" {
 			w.Header().Add("Content-Type", mediatype)
 		}
+		w.Header().Add("access-control-allow-origin", "*")
+
 		w.WriteHeader(status)
 		w.Write(encoded)
 	})
